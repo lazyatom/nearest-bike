@@ -40,7 +40,6 @@ def nearest_station_with_bike_to(lat, long)
   here = OpenStruct.new
   here.lat = lat #51.519826
   here.long = long #-0.163281
-  puts here
   near_stations_with_bikes = stations.select { |s| s.nbBikes.to_i > 0 }.sort_by { |s| distance(here, s) }
 
   near_stations_with_bikes.first
@@ -50,7 +49,7 @@ get "/" do
   haml :index
 end
 
-get "/near" do
+post "/near" do
   haml :near, :locals => {:station => nearest_station_with_bike_to(params[:lat], params[:long])}
 end
 
@@ -64,12 +63,14 @@ __END__
 @@ index
 :javascript
   function locate(location) {
-    jQuery.post("/near", {lat:location.coords.latitude,long:location.coords.longitude}, show);
-  };
-  function show(data) {
-    document.write(data);
+    jQuery.post("/near", {lat:location.coords.latitude,long:location.coords.longitude}, function(data) {
+      jQuery("#loading").html(data);
+    });
   };
   navigator.geolocation.getCurrentPosition(locate);
+%div#loading
+  %p Finding your nearest bike...
+
 
 @@ near
 %p Your nearest bike is at
