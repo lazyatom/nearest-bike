@@ -36,13 +36,13 @@ def stations
   end
 end
 
-def nearest_station_with_bike_to(lat, long)
+def nearest_stations_with_bike_to(lat, long)
   here = OpenStruct.new
   here.lat = lat #51.519826
   here.long = long #-0.163281
   near_stations_with_bikes = stations.select { |s| s.nbBikes.to_i > 0 }.sort_by { |s| distance(here, s) }
 
-  near_stations_with_bikes.first
+  near_stations_with_bikes[0,4]
 end
   
 get "/" do
@@ -50,7 +50,10 @@ get "/" do
 end
 
 post "/near" do
-  haml :near, :locals => {:station => nearest_station_with_bike_to(params[:lat], params[:long])}
+  near_stations = nearest_stations_with_bike_to(params[:lat], params[:long])
+  nearest_station = near_stations.first
+  other_stations = near_stations[1..-1]
+  haml :near, :locals => {:nearest_station => nearest_station, :other_stations => other_stations}
 end
 
 __END__
@@ -74,9 +77,21 @@ __END__
 
 @@ near
 %p Your nearest bike is at
-%h1= station.name
+%h1= nearest_station.name
 %p
-  = station.nbBikes
+  = nearest_station.nbBikes
   Bikes,
-  = station.nbEmptyDocks
+  = nearest_station.nbEmptyDocks
   Empty docks
+
+%p Other stations:
+%ul
+  - other_stations.each do |station|
+    %li
+      %p
+        %b= station.name
+        -
+        = station.nbBikes
+        Bikes,
+        = station.nbEmptyDocks
+        Empty docks
