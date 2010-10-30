@@ -38,13 +38,13 @@ end
 
 def nearest_stations_with_bike_to(lat, long)
   here = OpenStruct.new
-  here.lat = lat #51.519826
-  here.long = long #-0.163281
+  here.lat = lat
+  here.long = long
   near_stations_with_bikes = stations.select { |s| s.nbBikes.to_i > 0 }.sort_by { |s| distance(here, s) }
 
   near_stations_with_bikes[0,4]
 end
-  
+
 get "/" do
   haml :index
 end
